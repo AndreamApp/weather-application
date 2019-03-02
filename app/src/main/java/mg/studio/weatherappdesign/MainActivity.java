@@ -17,6 +17,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -30,8 +31,6 @@ import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String URL = "http://39.107.228.154:4000/weather";
-
     private ImageView mWeatherCondition;
     private TextView mLocation;
     private TextView mDate;
@@ -44,6 +43,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initViews();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
         updateDates();
         btnClick(null);
     }
@@ -59,8 +63,25 @@ public class MainActivity extends AppCompatActivity {
         mDay4Weather = findViewById(R.id.weather_day4);
     }
 
-    private void setWeatherCondition(int weatherCode, ImageView target) {
+    /**
+     * get resource id by string name
+     * @param resName resource name
+     * @param c class of resource, eg. R.drawable.class
+     * @return res id
+     */
+    private int getResId(String resName, Class<?> c) {
+        try {
+            Field idField = c.getDeclaredField(resName);
+            return idField.getInt(idField);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
 
+    private void setWeatherCondition(int weatherCode, ImageView target) {
+        int iconRes = getResId("weather_" + weatherCode, R.drawable.class);
+        target.setImageResource(iconRes);
     }
 
     protected void updateDates() {
@@ -74,6 +95,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void updateViews(WeatherBean.Weather weather) {
+        updateDates();
+
         if(weather.daily.size() == 5) {
             setWeatherCondition(weather.daily.get(0).code_day, mWeatherCondition);
             setWeatherCondition(weather.daily.get(1).code_day, mDay1Weather);
@@ -84,8 +107,6 @@ public class MainActivity extends AppCompatActivity {
         mTemperature.setText(weather.daily.get(0).high);
         mLocation.setText(weather.location.name);
         mDate.setText(weather.daily.get(0).date);
-
-        updateDates();
     }
 
     public void btnClick(View view) {

@@ -107,8 +107,8 @@ public class MainActivity extends AppCompatActivity {
         else {
             if(!ignoreToast) {
                 Toast.makeText(this, "Current temperature:" + weather.daily.get(0).high, Toast.LENGTH_SHORT).show();
-                ignoreToast = false;
             }
+            ignoreToast = false;
         }
 
         setWeatherCondition(weather.daily.get(0).code_day, mWeatherCondition);

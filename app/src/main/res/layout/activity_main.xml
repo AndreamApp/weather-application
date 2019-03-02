@@ -81,6 +81,7 @@
         android:text="Location"
         android:textColor="@android:color/white"
         android:textStyle="bold"
+        app:fontFamily="casual"
         app:layout_constraintLeft_toLeftOf="@id/img_weather_condition"
         app:layout_constraintRight_toRightOf="@id/img_weather_condition"
         app:layout_constraintTop_toBottomOf="@id/img_weather_condition" />
@@ -92,6 +93,7 @@
         android:text="03/03/2018"
         android:textColor="@android:color/white"
         android:paddingBottom="30dp"
+        app:fontFamily="casual"
         app:layout_constraintLeft_toLeftOf="@id/img_weather_condition"
         app:layout_constraintRight_toRightOf="@id/img_weather_condition"
         app:layout_constraintTop_toBottomOf="@id/tv_location" />
@@ -100,29 +102,32 @@
 
     <TextView
         android:id="@+id/temperature_of_the_day"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="right"
         android:text="28"
         android:textColor="@android:color/white"
         android:textSize="100sp"
         android:textStyle="bold"
-        android:layout_marginRight="35dp"
-        app:layout_constraintRight_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button"/>
+        android:layout_marginRight="55dp"
+        app:fontFamily="casual"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/img_weather_condition"
+        app:layout_constraintBottom_toBottomOf="@id/tv_date"/>
 
     <TextView
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/temperature_of_the_day"
         android:layout_alignRight="@id/temperature_of_the_day"
-        android:gravity="right"
+        android:gravity="center"
         android:text="°C"
         android:textColor="@android:color/white"
-        android:textSize="22sp"
-        android:layout_marginRight="30dp"
-        app:layout_constraintRight_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button" />
+        android:textSize="28sp"
+        app:fontFamily="casual"
+        android:layout_marginTop="10dp"
+        app:layout_constraintLeft_toRightOf="@id/temperature_of_the_day"
+        app:layout_constraintTop_toTopOf="@id/temperature_of_the_day" />
 
     <ImageView
         android:id="@+id/divider"
@@ -130,9 +135,17 @@
         android:layout_height="0dp"
         android:scaleType="fitXY"
         android:src="@drawable/design"
+        android:paddingTop="15dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_date"
+        app:layout_constraintBottom_toTopOf="@id/space"/>
+
+    <View
+        android:id="@+id/space"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:background="#ffffff"
         app:layout_constraintBottom_toTopOf="@id/weather_day1"/>
 
     <View
@@ -140,7 +153,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="#ffffff"
-        app:layout_constraintTop_toBottomOf="@id/divider"
+        app:layout_constraintTop_toBottomOf="@id/space"
         app:layout_constraintBottom_toBottomOf="parent" />
 
 
@@ -150,7 +163,6 @@
         android:layout_height="48dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toLeftOf="@id/weather_day2"
-        app:layout_constraintTop_toBottomOf="@id/divider"
         app:layout_constraintBottom_toTopOf="@id/tv_day1"/>
 
     <TextView
@@ -161,7 +173,9 @@
         android:text="mon"
         android:textAllCaps="true"
         android:textColor="#909090"
-        android:padding="20dp"
+        android:padding="25dp"
+        android:layout_margin="20dp"
+        app:fontFamily="casual"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="@id/weather_day1"
         app:layout_constraintRight_toRightOf="@id/weather_day1"/>
@@ -172,7 +186,7 @@
         android:layout_height="48dp"
         app:layout_constraintLeft_toRightOf="@id/weather_day1"
         app:layout_constraintRight_toLeftOf="@id/weather_day3"
-        app:layout_constraintTop_toBottomOf="@id/divider"
+        app:layout_constraintTop_toTopOf="@id/weather_day1"
         app:layout_constraintBottom_toTopOf="@id/tv_day1"/>
 
     <TextView
@@ -183,6 +197,7 @@
         android:text="tue"
         android:textAllCaps="true"
         android:textColor="#909090"
+        app:fontFamily="casual"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="@id/weather_day2"
         app:layout_constraintRight_toRightOf="@id/weather_day2"
@@ -194,7 +209,7 @@
         android:layout_height="48dp"
         app:layout_constraintLeft_toRightOf="@id/weather_day2"
         app:layout_constraintRight_toLeftOf="@id/weather_day4"
-        app:layout_constraintTop_toBottomOf="@id/divider"
+        app:layout_constraintTop_toTopOf="@id/weather_day1"
         app:layout_constraintBottom_toTopOf="@id/tv_day1"/>
 
     <TextView
@@ -205,6 +220,7 @@
         android:text="thu"
         android:textAllCaps="true"
         android:textColor="#909090"
+        app:fontFamily="casual"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="@id/weather_day3"
         app:layout_constraintRight_toRightOf="@id/weather_day3"
@@ -216,7 +232,7 @@
         android:layout_height="48dp"
         app:layout_constraintLeft_toRightOf="@id/weather_day3"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/divider"
+        app:layout_constraintTop_toTopOf="@id/weather_day1"
         app:layout_constraintBottom_toTopOf="@id/tv_day1"/>
 
     <TextView
@@ -227,6 +243,7 @@
         android:text="fri"
         android:textAllCaps="true"
         android:textColor="#909090"
+        app:fontFamily="casual"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="@id/weather_day4"
         app:layout_constraintRight_toRightOf="@id/weather_day4"

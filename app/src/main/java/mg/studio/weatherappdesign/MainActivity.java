@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -38,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageView mDay1Weather, mDay2Weather, mDay3Weather, mDay4Weather;
 
+    boolean ignoreToast;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         updateDates();
+        ignoreToast = true;
         btnClick(null);
     }
 
@@ -96,14 +100,23 @@ public class MainActivity extends AppCompatActivity {
 
     protected void updateViews(WeatherBean.Weather weather) {
         updateDates();
-
-        if(weather.daily.size() == 5) {
-            setWeatherCondition(weather.daily.get(0).code_day, mWeatherCondition);
-            setWeatherCondition(weather.daily.get(1).code_day, mDay1Weather);
-            setWeatherCondition(weather.daily.get(2).code_day, mDay2Weather);
-            setWeatherCondition(weather.daily.get(3).code_day, mDay3Weather);
-            setWeatherCondition(weather.daily.get(4).code_day, mDay4Weather);
+        if(weather == null || weather.daily.size() != 5) {
+            Toast.makeText(this, "Please check network!", Toast.LENGTH_SHORT).show();
+            return;
         }
+        else {
+            if(!ignoreToast) {
+                Toast.makeText(this, "Current temperature:" + weather.daily.get(0).high, Toast.LENGTH_SHORT).show();
+                ignoreToast = false;
+            }
+        }
+
+        setWeatherCondition(weather.daily.get(0).code_day, mWeatherCondition);
+        setWeatherCondition(weather.daily.get(1).code_day, mDay1Weather);
+        setWeatherCondition(weather.daily.get(2).code_day, mDay2Weather);
+        setWeatherCondition(weather.daily.get(3).code_day, mDay3Weather);
+        setWeatherCondition(weather.daily.get(4).code_day, mDay4Weather);
+
         mTemperature.setText(weather.daily.get(0).high);
         mLocation.setText(weather.location.name);
         mDate.setText(weather.daily.get(0).date);

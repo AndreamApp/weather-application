@@ -1,10 +1,14 @@
 package mg.studio.weatherappdesign;
 
+import android.animation.Animator;
+import android.animation.ValueAnimator;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,6 +36,8 @@ import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
 
+    private View bg;
+
     private ImageView mWeatherCondition;
     private TextView mLocation;
     private TextView mDate;
@@ -39,7 +45,12 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageView mDay1Weather, mDay2Weather, mDay3Weather, mDay4Weather;
 
-    boolean ignoreToast;
+    private boolean ignoreToast;
+    private WeatherBean.Weather currentWeather;
+    private ValueAnimator bgAnim;
+    private ValueAnimator tempAnim;
+    private int currentTemperature;
+    private int currentBgColor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initViews() {
+        bg = findViewById(R.id.bg);
         mWeatherCondition = findViewById(R.id.img_weather_condition);
         mLocation = findViewById(R.id.tv_location);
         mDate = findViewById(R.id.tv_date);
@@ -99,7 +111,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void updateViews(WeatherBean.Weather weather) {
-        updateDates();
         if(weather == null || weather.daily.size() != 5) {
             Toast.makeText(this, "Please check network!", Toast.LENGTH_SHORT).show();
             return;
@@ -111,19 +122,87 @@ public class MainActivity extends AppCompatActivity {
             ignoreToast = false;
         }
 
-        setWeatherCondition(weather.daily.get(0).code_day, mWeatherCondition);
+        currentWeather = weather;
+
         setWeatherCondition(weather.daily.get(1).code_day, mDay1Weather);
         setWeatherCondition(weather.daily.get(2).code_day, mDay2Weather);
         setWeatherCondition(weather.daily.get(3).code_day, mDay3Weather);
         setWeatherCondition(weather.daily.get(4).code_day, mDay4Weather);
 
-        mTemperature.setText(weather.daily.get(0).high);
-        mLocation.setText(weather.location.name);
-        mDate.setText(weather.daily.get(0).date);
+        updateDates();
+        updateCenterPanel(0);
+    }
+
+    private void updateCenterPanel(int i) {
+        if(currentWeather == null || currentWeather.daily.size()-1 < i) {
+            return;
+        }
+        // setup information of date i
+        mTemperature.setText(currentWeather.daily.get(i).high);
+        setWeatherCondition(currentWeather.daily.get(i).code_day, mWeatherCondition);
+        mLocation.setText(currentWeather.location.name);
+        mDate.setText(currentWeather.daily.get(i).date);
+
+        // background animation
+        final int srcColor = currentBgColor;
+        final int dstColor = WeatherUtils.getColorOfWeather(currentWeather.daily.get(i).code_day);
+        if(bgAnim != null && bgAnim.isRunning()) {
+            bgAnim.end();
+            bgAnim = null;
+        }
+        bgAnim = ValueAnimator.ofFloat(0, 1);
+        bgAnim.setDuration(1000);
+        bgAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                float k = animation.getAnimatedFraction();
+                int a = (int)(((dstColor >> 24) & 0xff) * k + ((srcColor >> 24) & 0xff) * (1 - k));
+                int r = (int)(((dstColor >> 16) & 0xff) * k + ((srcColor >> 16) & 0xff) * (1 - k));
+                int g = (int)(((dstColor >> 8) & 0xff) * k + ((srcColor >> 8) & 0xff) * (1 - k));
+                int b = (int)(((dstColor) & 0xff) * k + ((srcColor) & 0xff) * (1 - k));
+                int color = (a << 24) | (r << 16) | (g << 8) | b;
+                bg.setBackgroundColor(currentBgColor = color);
+            }
+        });
+        bgAnim.start();
+
+        // temperature animation
+        final int srcTemp = currentTemperature;
+        final int dstTemp = Integer.parseInt(currentWeather.daily.get(i).high);
+        if(tempAnim != null && tempAnim.isRunning()) {
+            tempAnim.end();
+            tempAnim = null;
+        }
+        tempAnim = ValueAnimator.ofInt(srcTemp, dstTemp);
+        tempAnim.setDuration(500);
+        tempAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                currentTemperature = (int)animation.getAnimatedValue();
+                mTemperature.setText(String.valueOf(currentTemperature));
+            }
+        });
+        tempAnim.start();
     }
 
     public void btnClick(View view) {
         new DownloadUpdate().execute();
+    }
+
+    public void day1Click(View view) {
+        updateCenterPanel(1);
+    }
+
+    public void day2Click(View view) {
+        updateCenterPanel(2);
+    }
+
+    public void day3Click(View view) {
+        updateCenterPanel(3);
+    }
+
+    public void day4Click(View view) {
+        updateCenterPanel(4);
     }
 
 

@@ -35,4 +35,17 @@ public class WeatherUtils {
 
         return weather.results.get(0);
     }
+
+    public static int getColorOfWeather(int code) {
+        if(code <= 3) // sunny -> yellow
+        {
+            return 0xfff9a901;
+        }
+        else if(code <= 9) { // cloudy -> gray
+            return 0xff7b7b7b;
+        }
+        else { // rainy -> blue
+            return 0xff2495d1;
+        }
+    }
 }

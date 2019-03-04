@@ -15,7 +15,7 @@ public class WeatherUtils {
 
     private static final String URL = "http://39.107.228.154:4000/weather";
 
-    public static WeatherBean.Weather getWeather() {
+    public static WeatherBean getWeather() {
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
                 .url(URL)
@@ -33,7 +33,7 @@ public class WeatherUtils {
 
         if(weather == null) return null;
 
-        return weather.results.get(0);
+        return weather;
     }
 
     public static int getColorOfWeather(int code) {

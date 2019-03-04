@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageView mDay1Weather, mDay2Weather, mDay3Weather, mDay4Weather;
 
     private boolean ignoreToast;
-    private WeatherBean.Weather currentWeather;
+    private WeatherBean currentWeather;
     private ValueAnimator bgAnim;
     private ValueAnimator tempAnim;
     private int currentTemperature;
@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
         ((TextView)findViewById(R.id.tv_day4)).setText(map[(dayOfWeek + 4) % 7].substring(0, 3));
     }
 
-    protected void updateViews(WeatherBean.Weather weather) {
+    protected void updateViews(WeatherBean weather) {
         if(weather == null || weather.daily.size() != 5) {
             Toast.makeText(this, "Please check network!", Toast.LENGTH_SHORT).show();
             return;
@@ -138,9 +138,10 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         // setup information of date i
-        mTemperature.setText(currentWeather.daily.get(i).high);
+        String temperature = i > 0 ? currentWeather.daily.get(i).high : currentWeather.temperature;
+        mTemperature.setText(temperature);
         setWeatherCondition(currentWeather.daily.get(i).code_day, mWeatherCondition);
-        mLocation.setText(currentWeather.location.name);
+        mLocation.setText(currentWeather.location);
         mDate.setText(currentWeather.daily.get(i).date);
 
         // background animation
@@ -206,16 +207,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private class DownloadUpdate extends AsyncTask<String, Void, WeatherBean.Weather> {
+    private class DownloadUpdate extends AsyncTask<String, Void, WeatherBean> {
 
 
         @Override
-        protected WeatherBean.Weather doInBackground(String... strings) {
+        protected WeatherBean doInBackground(String... strings) {
             return WeatherUtils.getWeather();
         }
 
         @Override
-        protected void onPostExecute(WeatherBean.Weather weather) {
+        protected void onPostExecute(WeatherBean weather) {
             updateViews(weather);
         }
     }

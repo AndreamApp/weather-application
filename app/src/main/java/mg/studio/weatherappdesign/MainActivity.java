@@ -125,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
         currentWeather = weather;
 
         setWeatherCondition(weather.daily.get(1).code_day, mDay1Weather);
+        setWeatherCondition(0, mDay1Weather);
         setWeatherCondition(weather.daily.get(2).code_day, mDay2Weather);
         setWeatherCondition(weather.daily.get(3).code_day, mDay3Weather);
         setWeatherCondition(weather.daily.get(4).code_day, mDay4Weather);
@@ -140,13 +141,14 @@ public class MainActivity extends AppCompatActivity {
         // setup information of date i
         String temperature = i > 0 ? currentWeather.daily.get(i).high : currentWeather.temperature;
         mTemperature.setText(temperature);
-        setWeatherCondition(currentWeather.daily.get(i).code_day, mWeatherCondition);
+        if(i == 1) setWeatherCondition(0, mWeatherCondition);
+        else setWeatherCondition(currentWeather.daily.get(i).code_day, mWeatherCondition);
         mLocation.setText(currentWeather.location);
         mDate.setText(currentWeather.daily.get(i).date);
 
         // background animation
         final int srcColor = currentBgColor;
-        final int dstColor = WeatherUtils.getColorOfWeather(currentWeather.daily.get(i).code_day);
+        final int dstColor = WeatherUtils.getColorOfWeather(i == 1 ? 0 : currentWeather.daily.get(i).code_day);
         if(bgAnim != null && bgAnim.isRunning()) {
             bgAnim.end();
             bgAnim = null;

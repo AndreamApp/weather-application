@@ -2,11 +2,11 @@
 
 ## Portrait
 
-![Weather demo](display/demo_weather_portrait.gif | width=100)
+<img src="display/demo_weather_portrait.gif" width="320" />
 
 ## Landscape
 
-![Weather demo](display/demo_weather_landscape.gif | height=100)
+<img src="display/demo_weather_landscape.gif" height="320" />
 
 ## Simplified API
 

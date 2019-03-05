@@ -16,8 +16,8 @@ public class WeatherBean {
 
     public class Daily {
         public String date;
-        public String text_day;
-        public int code_day;
+        public String text_day; // weather description of this day, in Chinese
+        public int code_day; // weather code
         public String high;
         public String low;
     }

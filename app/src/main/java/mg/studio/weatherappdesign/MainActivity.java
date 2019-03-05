@@ -37,20 +37,14 @@ import okhttp3.Response;
 public class MainActivity extends AppCompatActivity {
 
     private View bg;
-
     private ImageView mWeatherCondition;
     private TextView mLocation;
     private TextView mDate;
     private TextView mTemperature;
-
     private ImageView mDay1Weather, mDay2Weather, mDay3Weather, mDay4Weather;
 
     private boolean ignoreToast;
     private WeatherBean currentWeather;
-    private ValueAnimator bgAnim;
-    private ValueAnimator tempAnim;
-    private int currentTemperature;
-    private int currentBgColor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,35 +73,10 @@ public class MainActivity extends AppCompatActivity {
         mDay4Weather = findViewById(R.id.weather_day4);
     }
 
-    /**
-     * get resource id by string name
-     * @param resName resource name
-     * @param c class of resource, eg. R.drawable.class
-     * @return res id
-     */
-    private int getResId(String resName, Class<?> c) {
-        try {
-            Field idField = c.getDeclaredField(resName);
-            return idField.getInt(idField);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return -1;
-        }
-    }
 
     private void setWeatherCondition(int weatherCode, ImageView target) {
-        int iconRes = getResId("weather_" + weatherCode, R.drawable.class);
+        int iconRes = WeatherUtils.getWeatherIconByCode(weatherCode);
         target.setImageResource(iconRes);
-    }
-
-    protected void updateDates() {
-        int dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1;
-        String[] map = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
-        ((TextView)findViewById(R.id.tv_weekday)).setText(map[dayOfWeek]);
-        ((TextView)findViewById(R.id.tv_day1)).setText(map[(dayOfWeek + 1) % 7].substring(0, 3));
-        ((TextView)findViewById(R.id.tv_day2)).setText(map[(dayOfWeek + 2) % 7].substring(0, 3));
-        ((TextView)findViewById(R.id.tv_day3)).setText(map[(dayOfWeek + 3) % 7].substring(0, 3));
-        ((TextView)findViewById(R.id.tv_day4)).setText(map[(dayOfWeek + 4) % 7].substring(0, 3));
     }
 
     protected void updateViews(WeatherBean weather) {
@@ -134,6 +103,22 @@ public class MainActivity extends AppCompatActivity {
         updateCenterPanel(0);
     }
 
+    protected void updateDates() {
+        int dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1;
+        String[] map = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
+        ((TextView)findViewById(R.id.tv_weekday)).setText(map[dayOfWeek]);
+        ((TextView)findViewById(R.id.tv_day1)).setText(map[(dayOfWeek + 1) % 7].substring(0, 3));
+        ((TextView)findViewById(R.id.tv_day2)).setText(map[(dayOfWeek + 2) % 7].substring(0, 3));
+        ((TextView)findViewById(R.id.tv_day3)).setText(map[(dayOfWeek + 3) % 7].substring(0, 3));
+        ((TextView)findViewById(R.id.tv_day4)).setText(map[(dayOfWeek + 4) % 7].substring(0, 3));
+    }
+
+    // Variables for animation
+    private ValueAnimator bgAnim;
+    private int currentBgColor;
+    private ValueAnimator tempAnim;
+    private int currentTemperature;
+
     private void updateCenterPanel(int i) {
         if(currentWeather == null || currentWeather.daily.size()-1 < i) {
             return;
@@ -151,21 +136,17 @@ public class MainActivity extends AppCompatActivity {
         final int dstColor = WeatherUtils.getColorOfWeather(i == 1 ? 0 : currentWeather.daily.get(i).code_day);
         if(bgAnim != null && bgAnim.isRunning()) {
             bgAnim.end();
-            bgAnim = null;
         }
         bgAnim = ValueAnimator.ofFloat(0, 1);
         bgAnim.setDuration(1000);
-        bgAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                float k = animation.getAnimatedFraction();
-                int a = (int)(((dstColor >> 24) & 0xff) * k + ((srcColor >> 24) & 0xff) * (1 - k));
-                int r = (int)(((dstColor >> 16) & 0xff) * k + ((srcColor >> 16) & 0xff) * (1 - k));
-                int g = (int)(((dstColor >> 8) & 0xff) * k + ((srcColor >> 8) & 0xff) * (1 - k));
-                int b = (int)(((dstColor) & 0xff) * k + ((srcColor) & 0xff) * (1 - k));
-                int color = (a << 24) | (r << 16) | (g << 8) | b;
-                bg.setBackgroundColor(currentBgColor = color);
-            }
+        bgAnim.addUpdateListener(animation -> {
+            float k = animation.getAnimatedFraction();
+            int a = (int)(((dstColor >> 24) & 0xff) * k + ((srcColor >> 24) & 0xff) * (1 - k));
+            int r = (int)(((dstColor >> 16) & 0xff) * k + ((srcColor >> 16) & 0xff) * (1 - k));
+            int g = (int)(((dstColor >> 8) & 0xff) * k + ((srcColor >> 8) & 0xff) * (1 - k));
+            int b = (int)(((dstColor) & 0xff) * k + ((srcColor) & 0xff) * (1 - k));
+            int color = (a << 24) | (r << 16) | (g << 8) | b;
+            bg.setBackgroundColor(currentBgColor = color);
         });
         bgAnim.start();
 
@@ -174,16 +155,12 @@ public class MainActivity extends AppCompatActivity {
         final int dstTemp = Integer.parseInt(currentWeather.daily.get(i).high);
         if(tempAnim != null && tempAnim.isRunning()) {
             tempAnim.end();
-            tempAnim = null;
         }
         tempAnim = ValueAnimator.ofInt(srcTemp, dstTemp);
         tempAnim.setDuration(500);
-        tempAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                currentTemperature = (int)animation.getAnimatedValue();
-                mTemperature.setText(String.valueOf(currentTemperature));
-            }
+        tempAnim.addUpdateListener(animation -> {
+            currentTemperature = (int)animation.getAnimatedValue();
+            mTemperature.setText(String.valueOf(currentTemperature));
         });
         tempAnim.start();
     }
@@ -210,7 +187,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     private class DownloadUpdate extends AsyncTask<String, Void, WeatherBean> {
-
 
         @Override
         protected WeatherBean doInBackground(String... strings) {

@@ -2,15 +2,15 @@
 
 ## Portrait
 
-![Weather demo](display/demo_weather_portrait.gif)
+![Weather demo](display/demo_weather_portrait.gif | width=100)
 
 ## Landscape
 
-![Weather demo](display/demo_weather_landscape.gif)
+![Weather demo](display/demo_weather_landscape.gif | height=100)
 
 ## Simplified API
 
-This weather api is an simplified version from [seniverse.com/doc](https://www.seniverse.com/doc)
+This weather api is a simplified version from [seniverse.com/doc](https://www.seniverse.com/doc)
 
 See: [https://cqu.andream.app/weather](https://cqu.andream.app/weather)
 

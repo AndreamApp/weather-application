@@ -107,7 +107,7 @@
         android:layout_height="wrap_content"
         android:gravity="right"
         android:textColor="@android:color/white"
-        android:textSize="100sp"
+        android:textSize="70sp"
         android:textStyle="bold"
         android:layout_marginRight="55dp"
         app:fontFamily="casual"

@@ -1,42 +1,23 @@
 package mg.studio.weatherappdesign;
 
-import android.animation.Animator;
 import android.animation.ValueAnimator;
-import android.graphics.Color;
+import android.content.res.ColorStateList;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.view.animation.DecelerateInterpolator;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.Field;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
 import java.util.Calendar;
-
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
 
 public class MainActivity extends AppCompatActivity {
 
     private View bg;
+    private Button btn;
     private ImageView mWeatherCondition;
     private TextView mLocation;
     private TextView mDate;
@@ -63,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initViews() {
         bg = findViewById(R.id.bg);
+        btn = findViewById(R.id.button);
         mWeatherCondition = findViewById(R.id.img_weather_condition);
         mLocation = findViewById(R.id.tv_location);
         mDate = findViewById(R.id.tv_date);
@@ -94,7 +76,6 @@ public class MainActivity extends AppCompatActivity {
         currentWeather = weather;
 
         setWeatherCondition(weather.daily.get(1).code_day, mDay1Weather);
-        setWeatherCondition(0, mDay1Weather);
         setWeatherCondition(weather.daily.get(2).code_day, mDay2Weather);
         setWeatherCondition(weather.daily.get(3).code_day, mDay3Weather);
         setWeatherCondition(weather.daily.get(4).code_day, mDay4Weather);
@@ -103,43 +84,57 @@ public class MainActivity extends AppCompatActivity {
         updateCenterPanel(0);
     }
 
+    String[] map = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
     protected void updateDates() {
         int dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1;
-        String[] map = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
         ((TextView)findViewById(R.id.tv_weekday)).setText(map[dayOfWeek]);
-        ((TextView)findViewById(R.id.tv_day1)).setText(map[(dayOfWeek + 1) % 7].substring(0, 3));
-        ((TextView)findViewById(R.id.tv_day2)).setText(map[(dayOfWeek + 2) % 7].substring(0, 3));
-        ((TextView)findViewById(R.id.tv_day3)).setText(map[(dayOfWeek + 3) % 7].substring(0, 3));
-        ((TextView)findViewById(R.id.tv_day4)).setText(map[(dayOfWeek + 4) % 7].substring(0, 3));
+        for(int i = 1; i <= 4; i++) {
+            int tvId = WeatherUtils.getResId("tv_day" + i, R.id.class);
+            String day = map[(dayOfWeek + i) % 7].substring(0, 3);
+            if(currentWeather != null) {
+                day += "\n" + currentWeather.daily.get(i).low + "~" + currentWeather.daily.get(i).high;
+            }
+            ((TextView)findViewById(tvId)).setText(day);
+        }
     }
 
     // Variables for animation
-    private ValueAnimator bgAnim;
+    private ValueAnimator animator;
     private int currentBgColor;
-    private ValueAnimator tempAnim;
-    private int currentTemperature;
+    private int currentTemperatureLow;
+    private int currentTemperatureHigh;
 
     private void updateCenterPanel(int i) {
         if(currentWeather == null || currentWeather.daily.size()-1 < i) {
             return;
         }
-        // setup information of date i
-        String temperature = i > 0 ? currentWeather.daily.get(i).high : currentWeather.temperature;
-        mTemperature.setText(temperature);
-        if(i == 1) setWeatherCondition(0, mWeatherCondition);
-        else setWeatherCondition(currentWeather.daily.get(i).code_day, mWeatherCondition);
-        mLocation.setText(currentWeather.location);
-        mDate.setText(currentWeather.daily.get(i).date);
+        WeatherBean.Daily daily = currentWeather.daily.get(i);
 
-        // background animation
+        // setup information of date i
+        int dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1 + i;
+        ((TextView)findViewById(R.id.tv_weekday)).setText(map[dayOfWeek]);
+
+        String temperature = daily.low + "~" + daily.high;
+        mTemperature.setText(temperature);
+
+        if(i == 1) setWeatherCondition(0, mWeatherCondition);
+        else setWeatherCondition(daily.code_day, mWeatherCondition);
+        mLocation.setText(currentWeather.location);
+        mDate.setText(daily.date);
+
+        // transform animation
         final int srcColor = currentBgColor;
-        final int dstColor = WeatherUtils.getColorOfWeather(i == 1 ? 0 : currentWeather.daily.get(i).code_day);
-        if(bgAnim != null && bgAnim.isRunning()) {
-            bgAnim.end();
+        final int dstColor = WeatherUtils.getColorOfWeather(daily.code_day);
+        final int srcLow = currentTemperatureLow;
+        final int dstLow = Integer.parseInt(daily.low);
+        final int srcHigh = currentTemperatureHigh;
+        final int dstHigh = Integer.parseInt(daily.high);
+        if(animator != null && animator.isRunning()) {
+            animator.end();
         }
-        bgAnim = ValueAnimator.ofFloat(0, 1);
-        bgAnim.setDuration(1000);
-        bgAnim.addUpdateListener(animation -> {
+        animator = ValueAnimator.ofFloat(0, 1);
+        animator.setDuration(400);
+        animator.addUpdateListener(animation -> {
             float k = animation.getAnimatedFraction();
             int a = (int)(((dstColor >> 24) & 0xff) * k + ((srcColor >> 24) & 0xff) * (1 - k));
             int r = (int)(((dstColor >> 16) & 0xff) * k + ((srcColor >> 16) & 0xff) * (1 - k));
@@ -147,22 +142,13 @@ public class MainActivity extends AppCompatActivity {
             int b = (int)(((dstColor) & 0xff) * k + ((srcColor) & 0xff) * (1 - k));
             int color = (a << 24) | (r << 16) | (g << 8) | b;
             bg.setBackgroundColor(currentBgColor = color);
-        });
-        bgAnim.start();
+            btn.setBackgroundColor(color - 0x101010);
 
-        // temperature animation
-        final int srcTemp = currentTemperature;
-        final int dstTemp = Integer.parseInt(currentWeather.daily.get(i).high);
-        if(tempAnim != null && tempAnim.isRunning()) {
-            tempAnim.end();
-        }
-        tempAnim = ValueAnimator.ofInt(srcTemp, dstTemp);
-        tempAnim.setDuration(500);
-        tempAnim.addUpdateListener(animation -> {
-            currentTemperature = (int)animation.getAnimatedValue();
-            mTemperature.setText(String.valueOf(currentTemperature));
+            currentTemperatureLow = (int)(srcLow + (dstLow - srcLow) * k);
+            currentTemperatureHigh = (int)(srcHigh + (dstHigh - srcHigh) * k);
+            mTemperature.setText(currentTemperatureLow + "~" + currentTemperatureHigh);
         });
-        tempAnim.start();
+        animator.start();
     }
 
     public void btnClick(View view) {

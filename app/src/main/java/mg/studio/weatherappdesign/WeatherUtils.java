@@ -50,10 +50,10 @@ public class WeatherUtils {
     public static int getColorOfWeather(int code) {
         if(code <= 3) // sunny -> yellow
         {
-            return 0xfff9a901;
+            return 0xfff9c021;
         }
         else if(code <= 9) { // cloudy -> gray
-            return 0xff7b7b7b;
+            return 0xff909090;
         }
         else { // rainy -> blue
             return 0xff2495d1;
@@ -67,7 +67,7 @@ public class WeatherUtils {
      * @param c class of resource, eg. R.drawable.class
      * @return res id
      */
-    private static int getResId(String resName, Class<?> c) {
+    public static int getResId(String resName, Class<?> c) {
         try {
             Field idField = c.getDeclaredField(resName);
             return idField.getInt(idField);
